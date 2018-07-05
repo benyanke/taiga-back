@@ -106,9 +106,15 @@ class AuthViewSet(viewsets.ViewSet):
         self.check_permissions(request, 'create', None)
         auth_plugins = get_auth_plugins()
 
-        login_types = request.DATA.get("type", None)
+        login_types_raw = request.DATA.get("type", None)
         invitation_token = request.DATA.get("invitation_token", None)
-
+        
+        # Convert string to list
+        if type(login_types) is not list:
+            login_types[0] = login_types_raw
+        else:
+            login_types = login_types_raw
+          
         for login_type in login_types:
             if login_type in auth_plugins:
                 data = auth_plugins[login_type]['login_func'](request)
