@@ -106,13 +106,14 @@ class AuthViewSet(viewsets.ViewSet):
         self.check_permissions(request, 'create', None)
         auth_plugins = get_auth_plugins()
 
-        login_type = request.DATA.get("type", None)
+        login_types = request.DATA.get("type", None)
         invitation_token = request.DATA.get("invitation_token", None)
 
-        if login_type in auth_plugins:
-            data = auth_plugins[login_type]['login_func'](request)
-            if invitation_token:
-                accept_invitation_by_existing_user(invitation_token, data['id'])
-            return response.Ok(data)
+        for login_type in login_types:
+            if login_type in auth_plugins:
+                data = auth_plugins[login_type]['login_func'](request)
+                if invitation_token:
+                    accept_invitation_by_existing_user(invitation_token, data['id'])
+                return response.Ok(data)
 
         raise exc.BadRequest(_("invalid login type"))
